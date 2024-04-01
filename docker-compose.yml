@@ -3,8 +3,8 @@ networks:
   von:
 services:
 
-  holder-agent:
-    image: bcgovimages/aries-cloudagent:py3.9-indy-1.16.0_0.11.0-rc1 
+  issuer-agent:
+    image: aries-cloudagent:py3.9-indy-1.16.0_0.11.0-rc1
     ports:
       - 11000:11000
       - 8001:8001
@@ -14,9 +14,9 @@ services:
         "sleep 5; \
         aca-py start \
         --auto-provision \
-        --seed 'holder00000000000000000000000001' \
+        --seed 'issuer00000000000000000000000001' \
         --inbound-transport http '0.0.0.0' 8001 \
-        --endpoint 'http://holder-agent:8001' \
+        --endpoint 'http://issuer-agent:8001' \
         --outbound-transport http \
         --genesis-url 'http://webserver:8000/genesis' \
         --auto-accept-invites \
@@ -30,28 +30,25 @@ services:
         --notify-revocation \
         --monitor-revocation-notification \
         --wallet-type 'askar' \
-        --wallet-storage-type 'postgres_storage' \
-        --wallet-storage-config '{\"url\":\"wallet-db:5432\",\"max_connections\":5}' \
-        --wallet-storage-creds '{\"account\":\"DB_USER\",\"password\":\"DB_PASSWORD\",\"admin_account\":\"DB_USER\",\"admin_password\":\"DB_PASSWORD\"}' \
-                
-        --wallet-name 'car_agent_wallet' \
+        --wallet-name 'issuer_agent_wallet' \
         --wallet-key 'key' \
         --admin '0.0.0.0' 11000 \
         --admin-insecure-mode \
-        --label 'holder' \
+        --wallet-storage-type 'postgres_storage' \
+        --wallet-storage-config '{\"url\":\"wallet-db:5432\",\"max_connections\":5}' \
+        --wallet-storage-creds '{\"account\":\"DB_USER\",\"password\":\"DB_PASSWORD\",\"admin_account\":\"DB_USER\",\"admin_password\":\"DB_PASSWORD\"}' \
+        --label 'issuer' \
         --log-level 'info' ",
       ]
     depends_on:
-      - wallet-db
+      - wallet-db      
     networks:
       - von
 
 
 
-
-
   verifier-agent:
-    image: bcgovimages/aries-cloudagent:py3.9-indy-1.16.0_0.11.0-rc1 
+    image: aries-cloudagent:py3.9-indy-1.16.0_0.11.0-rc1
     ports:
       - 11001:11000
       - 8002:8001
@@ -77,7 +74,7 @@ services:
         --notify-revocation \
         --monitor-revocation-notification \
         --wallet-type 'askar' \
-        --wallet-name 'car_agent_wallet' \
+        --wallet-name 'verifier_agent_wallet' \
         --wallet-key 'key' \
         --admin '0.0.0.0' 11000 \
         --admin-insecure-mode \
@@ -92,8 +89,6 @@ services:
     networks:
       - von
 
-
-# posggresaql https://github.com/hyperledger/aries-cloudagent-python/blob/main/demo/docker/docker-compose.yml
 
 
   wallet-db:
